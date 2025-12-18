@@ -3,6 +3,7 @@ import type { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { envVars } from "./app/config/env";
+import { seedSuperAdmin } from "./app/utils/seedSuperAdmin";
 
 let server: Server;
 
@@ -20,7 +21,10 @@ const startServer = async () => {
   }
 };
 
-startServer();
+(async () => {
+  await startServer();
+  await seedSuperAdmin();
+})();
 
 process.on("SIGTERM", () => {
   console.log("SIGTERM signal received. Server shutting down...");
@@ -70,10 +74,8 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-
 // Unhandled rejection error
 // Promise.reject(new Error("I forgot to catch this promise."))
 
 // Uncaught Exception error
 // throw new Error("I forgot to handle local error.")
-

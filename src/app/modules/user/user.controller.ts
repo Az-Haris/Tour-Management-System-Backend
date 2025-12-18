@@ -4,9 +4,12 @@ import httpStatus from "http-status-codes";
 import { UserServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { verifyToken } from "../../utils/jwt";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 
-
+// Create a new user
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // throw new AppError(httpStatus.BAD_REQUEST, "Fake error message");
@@ -28,6 +31,32 @@ const createUser = catchAsync(
   },
 );
 
+
+// Update an existing user
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+
+    // const token = req.headers.authorization;
+    // const verifiedToken = verifyToken(token as string, envVars.JWT_ACCESS_SECRET) as JwtPayload;
+    const verifiedToken = req.user as JwtPayload;
+    
+    const payload = req.body;
+
+    const user = await UserServices.updateUser(userId, payload, verifiedToken);
+
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    })
+  },
+);
+
+
+// Get all users
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const users = await UserServices.getAllUsers();
@@ -51,4 +80,5 @@ const getAllUsers = catchAsync(
 export const UserControllers = {
   createUser,
   getAllUsers,
+  updateUser,
 };
